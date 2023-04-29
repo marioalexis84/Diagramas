@@ -28,25 +28,42 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 
     {t3, s3} = u[[t, -2]];
 
+    suffixSubFase1  = ToString[t3]<>"_"<>ToString[s3];
     Check[
-        fase1 = Get["./Fases/T10Fase1_"<>suffixFase1<>".txt"];,
-        fase1 = Simplify[Calc[
-            fase0 *
+        subFase1 = Get["./Fases/SubFases/T10SubFase1_"<>suffixSubFase1<>".txt"];,
+        subFase1 = Simplify[Calc[
             GravitonVertexRsim[t3, s3, m3, n3, k3, a3, b3, p3, q3, r3, -k1] *
             GravitonPropagatorC[q2, r2, m3, n3, k3, D] *
             GravitonPropagatorC[q3, r3, m1, n1, k1, D]]];
+            Export["./Fases/SubFases/T10SubFase1_"<>suffixSubFase1<>".txt", subFase1];,
+        Get::noopen];
+
+    Print["Fin subFase1 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
+
+    Check[
+        fase1 = Get["./Fases/T10Fase1_"<>suffixFase1<>".txt"];,
+        fase1 = Simplify[Calc[fase0 * subFase1]];
             Export["./Fases/T10Fase1_"<>suffixFase1<>".txt", fase1];,
         Get::noopen];
 
     Print["Fin fase1 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
     {t4, s4} = u[[t, -1]];
-    fase2 = Simplify[Calc[
-        fase1 *
-        GravitonVertexRsim[t4, s4, a11, b11, p1, a22, b22, p2, a33, b33, p3] *
-        GravitonPropagatorC[a1, b1, a11, b11, p1, D] *
-        GravitonPropagatorC[a2, b2, a22, b22, p2, D] *
-        GravitonPropagatorC[a3, b3, a33, b33, p3, D]]];
+
+    suffixSubFase2  = ToString[t4]<>"_"<>ToString[s4];
+    Check[
+        subFase2 = Get["./Fases/SubFases/T10SubFase2_"<>suffixSubFase2<>".txt"];,
+        subFase2 = Simplify[Calc[
+            GravitonVertexRsim[t4, s4, a11, b11, p1, a22, b22, p2, a33, b33, p3] *
+            GravitonPropagatorC[a1, b1, a11, b11, p1, D] *
+            GravitonPropagatorC[a2, b2, a22, b22, p2, D] *
+            GravitonPropagatorC[a3, b3, a33, b33, p3, D]]];
+            Export["./Fases/SubFases/T10SubFase2_"<>suffixSubFase2<>".txt", subFase2];,
+        Get::noopen];
+
+    Print["Fin subFase2 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
+
+    fase2 = Simplify[Calc[fase1 * subFase2]];
 
     Print["Fin fase2 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
