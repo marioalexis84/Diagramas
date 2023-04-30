@@ -42,50 +42,36 @@ GravitonVertexRsim[s_,a_,a1_,b1_,k1_,a2_,b2_,k2_,a3_,b3_,k3_] = If[
 
 u = Tuples[{{0,1}, {1,1}, {0,2}, {1,2}, {0,3}, {1,3}}, 4];
 
-(*
-MBenznuevomodeloj[t_, k1_, k2_, k3_, D_] := Module[
-   {fase1, fase2, fase3, DiagramaMBenz, t1, t2, t3, t4, s1, s2, s3, 
-    s4, p1, p2, p3},
-   {{t1, s1}, {t2, s2}, {t3, s3}, {t4, s4}} = u[[t]];
-   fase1 = Simplify[Calc[GravitonVertexRsim[t1, s1, m1, n1, k1, a1, b1, p1, q1, r1, -k2]* GravitonVertexRsim[t2, s2, m2, n2, k2, a2, b2, p2, q2, r2, -k3]* GravitonVertexRsim[t3, s3, m3, n3, k3, a3, b3, p3, q3, r3, -k1]* GravitonPropagatorC[q1, r1, m2, n2, k2, D]* GravitonPropagatorC[q2, r2, m3, n3, k3, D]* GravitonPropagatorC[q3, r3, m1, n1, k1, D]]];
-   fase2 = Simplify[Calc[      fase1*       GravitonVertexRsim[t4, s4, a11, b11, p1, a22, b22, p2, a33,         b33, p3]*       GravitonPropagatorC[a1, b1, a11, b11, p1, D]*       GravitonPropagatorC[a2, b2, a22, b22, p2, D]*       GravitonPropagatorC[a3, b3, a33, b33, p3, D]]];
-   Clear[fase1];
-   fase3 = fase2 /. {p1 -> k2 - k1, p2 -> k3 - k2, p3 -> k1 - k3};
-   DiagramaMBenz = Simplify[ScalarProductExpand[fase3]]; 
-   DiagramaMBenz];
-*)
 
-MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
-    {i, j, suffixFase0, suffixFase1,
-     fase0, fase1, fase2, fase3, DiagramaMBenz,
-     t1, t2, t3, t4, s1, s2, s3, s4, p1=p1, p2=p2, p3=p3},
-
-    tInicial = AbsoluteTime[];
+T10Fase0[t_] := Module[
+    {i, fase0, t1, s1, t2, s2, suffixFase0},
 
     i = Quotient[t, 36, 1]*36;
     suffixFase0 = ToString[i+1]<>"-"<>ToString[i+36];
-    j = Quotient[t, 6, 1]*6;
-    suffixFase1 = ToString[j+1]<>"-"<>ToString[j+6];
 
     {{t1,s1}, {t2,s2}} = u[[t, 1;;2]];
-
-    Print["Inicio fase0 - Item "<>ToString[t]];
 
     Check[
         fase0 = Get["./Fases/T10Fase0_"<>suffixFase0<>".txt"];,
         fase0 = Simplify[Calc[
             GravitonVertexRsim[t1, s1, m1, n1, k1, a1, b1, p1, q1, r1, -k2] *
-            GravitonVertexRsim[t2, s2, m2, n2, k2, a2, b2, p2, q2, r2, -k3] *
-            GravitonPropagatorC[q1, r1, m2, n2, k2, D]]];
-
+            Simplify[Calc[
+                GravitonVertexRsim[t2, s2, m2, n2, k2, a2, b2, p2, q2, r2, -k3] *
+                GravitonPropagatorC[q1, r1, m2, n2, k2, D]]]]];
             Export["./Fases/T10Fase0_"<>suffixFase0<>".txt", fase0];,
         Get::noopen];
 
     Print["Fin fase0 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
-    {t3, s3} = u[[t, -2]];
+    fase0
+];
 
+T10SubFase1[t_] := Module[
+    {t3, s3, subFase1, suffixSubFase1},
+
+    {t3, s3} = u[[t, -2]];
     suffixSubFase1  = ToString[t3]<>"_"<>ToString[s3];
+
     Check[
         subFase1 = Get["./Fases/SubFases/T10SubFase1_"<>suffixSubFase1<>".txt"];,
         subFase1 = Simplify[Calc[
@@ -97,17 +83,32 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 
     Print["Fin subFase1 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
+    subFase1
+];
+
+T10Fase1[t_] := Module[
+    {j, fase1, suffixFase1},
+
+    j = Quotient[t, 6, 1]*6;
+    suffixFase1 = ToString[j+1]<>"-"<>ToString[j+6];
+
     Check[
         fase1 = Get["./Fases/T10Fase1_"<>suffixFase1<>".txt"];,
-        fase1 = Simplify[Calc[fase0 * subFase1]];
+        fase1 = Simplify[Calc[T10Fase0[t] * T10SubFase1[t]]];
             Export["./Fases/T10Fase1_"<>suffixFase1<>".txt", fase1];,
         Get::noopen];
 
     Print["Fin fase1 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
-    {t4, s4} = u[[t, -1]];
+    fase1
+];
 
+T10SubFase2[t_] := Module[
+    {t4, s4, subFase2, suffixSubFase2},
+
+    {t4, s4} = u[[t, -1]];
     suffixSubFase2  = ToString[t4]<>"_"<>ToString[s4];
+
     Check[
         subFase2 = Get["./Fases/SubFases/T10SubFase2_"<>suffixSubFase2<>".txt"];,
         subFase2 = Simplify[Calc[
@@ -120,7 +121,17 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 
     Print["Fin subFase2 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
-    fase2 = Simplify[Calc[fase1 * subFase2]];
+    subFase2
+];
+
+MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
+    {fase2, fase3, DiagramaMBenz},
+(*
+    tInicial = AbsoluteTime[];
+*)
+    Print["Inicio Item: "<>ToString[t]];
+
+    fase2 = Simplify[Calc[T10Fase1[t] * T10SubFase2[t]]];
 
     Print["Fin fase2 - Item: "<>ToString[t]<>":\tTiempo: "<>ToString[AbsoluteTime[]-tInicial]];
 
@@ -133,18 +144,25 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 ];
 
 
-(*For[i=1,i<1297,i++,t=DiagramaMarioPazmod[i,k1,k2,k3,D];Export["MBenz"<>ToString[i]<>".txt",t]]*)
 
-
-KERNELS = 2
+KERNELS = 4
 LaunchKernels[KERNELS]
 
 ParallelTable[<<FeynCalc`;,{i, 1, KERNELS}];
 
-F[i_]:= Export["./TDiezTestFasesMODSubFases_"<>ToString[i]<>".txt", MBenzModelo[i, k1, k2, k3, D]];
+F[i_]:= Export["./TDiez_"<>ToString[i]<>".txt", MBenzModelo[i, k1, k2, k3, D]];
 
-Parallelize[Map[F,Range[1148, 1152]]];
+tInicial = AbsoluteTime[];
 
+buscados = Range[793, 900];
 (*
-Parallelize[Map[F,{3}]];
+buscados = {1,2,3,5,7,8,14};
 *)
+
+(* Obtener todas las fase0*)
+Parallelize[Map[T10Fase0, Range[buscados[[1]], buscados[[-1]], 36]]];
+
+(* Obtener todas las fase1*)
+Parallelize[Map[T10Fase1, Range[buscados[[1]], buscados[[-1]], 6]]];
+
+Parallelize[Map[F, buscados]];
