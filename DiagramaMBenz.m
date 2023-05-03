@@ -10,7 +10,8 @@ GravitonVertex[m1_,n1_,p1_,m2_,n2_,p2_,m3_,n3_,p3_] = Get["./GravitonVertex_1"];
 FCSetScalarProducts[{SPD[k1,k2],SPD[k1,k3],SPD[k2,k3]},{0,0,0}]
 
 
-A[a1_,b1_,k1_,a2_,b2_,k2_,a3_,b3_,k3_] = FullSimplify[ScalarProductExpand[GravitonVertex[a1,b1,k1,a2,b2,k2,a3,b3,k3]]];
+A[a1_,b1_,k1_,a2_,b2_,k2_,a3_,b3_,k3_] = FullSimplify[ScalarProductExpand[
+    GravitonVertex[a1,b1,k1,a2,b2,k2,a3,b3,k3]]];
 
 
 FCClearScalarProducts[]
@@ -36,8 +37,10 @@ GravitonPropagatorC[\[Mu]_,\[Nu]_,\[Alpha]_,\[Beta]_,k_,D_] = FullSimplify[
 
 GravitonVertexRsim[s_,a_,a1_,b1_,k1_,a2_,b2_,k2_,a3_,b3_,k3_] = If[
     s == 0,
-    Simplify[GravitonVertexR[a1, b1, (1 - KroneckerDelta[a,1])*k1, a2, b2, (1-KroneckerDelta[a,2])*k2, a3, b3, (1-KroneckerDelta[a,3])*k3]],
-    Simplify[A[a1, b1, (1-KroneckerDelta[a,1])*k1, a2, b2, (1-KroneckerDelta[a,2])*k2, a3, b3, (1-KroneckerDelta[a,3])*k3]]];
+    Simplify[GravitonVertexR[a1, b1, (1 - KroneckerDelta[a,1])*k1, a2, b2,
+                (1-KroneckerDelta[a,2])*k2, a3, b3, (1-KroneckerDelta[a,3])*k3]],
+    Simplify[A[a1, b1, (1-KroneckerDelta[a,1])*k1, a2, b2,
+                (1-KroneckerDelta[a,2])*k2, a3, b3, (1-KroneckerDelta[a,3])*k3]]];
 
 
 u = Tuples[{{0,1}, {1,1}, {0,2}, {1,2}, {0,3}, {1,3}}, 4];
@@ -145,24 +148,24 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 
 
 
-KERNELS = 4
+KERNELS = 3
 LaunchKernels[KERNELS]
 
 ParallelTable[<<FeynCalc`;,{i, 1, KERNELS}];
 
-F[i_]:= Export["./TDiez_"<>ToString[i]<>".txt", MBenzModelo[i, k1, k2, k3, D]];
+F[i_]:= (Export["./TDiez_"<>ToString[i]<>".txt", MBenzModelo[i, k1, k2, k3, D]]; ClearSystemCache[];)
 
 tInicial = AbsoluteTime[];
 
-buscados = Range[793, 900];
 (*
+buscados = Range[793, 900];
 buscados = {1,2,3,5,7,8,14};
 *)
-
 (* Obtener todas las fase0*)
+(*
 Parallelize[Map[T10Fase0, Range[buscados[[1]], buscados[[-1]], 36]]];
 
 (* Obtener todas las fase1*)
 Parallelize[Map[T10Fase1, Range[buscados[[1]], buscados[[-1]], 6]]];
-
-Parallelize[Map[F, buscados]];
+*)
+Parallelize[Map[F,{1,2,3}]];
