@@ -1,4 +1,4 @@
-#!/home/alexis/Descargas/Mathematica/Executables/wolframscript --file
+#!/usr/bin/env -S wolframscript --file
 
 
 <<FeynCalc`
@@ -47,7 +47,7 @@ u = Tuples[{{0,1}, {1,1}, {0,2}, {1,2}, {0,3}, {1,3}}, 4];
 
 
 T10Fase0[t_] := Module[
-    {i, fase0, t1, s1, t2, s2, suffixFase0},
+    {i, t1, s1, t2, s2, suffixFase0},
 
     i = Quotient[t, 36, 1]*36;
     suffixFase0 = ToString[i+1]<>"-"<>ToString[i+36];
@@ -70,7 +70,7 @@ T10Fase0[t_] := Module[
 ];
 
 T10SubFase1[t_] := Module[
-    {t3, s3, subFase1, suffixSubFase1},
+    {t3, s3, suffixSubFase1},
 
     {t3, s3} = u[[t, -2]];
     suffixSubFase1  = ToString[t3]<>"_"<>ToString[s3];
@@ -90,7 +90,7 @@ T10SubFase1[t_] := Module[
 ];
 
 T10Fase1[t_] := Module[
-    {j, fase1, suffixFase1},
+    {j, suffixFase1},
 
     j = Quotient[t, 6, 1]*6;
     suffixFase1 = ToString[j+1]<>"-"<>ToString[j+6];
@@ -107,7 +107,7 @@ T10Fase1[t_] := Module[
 ];
 
 T10SubFase2[t_] := Module[
-    {t4, s4, subFase2, suffixSubFase2},
+    {t4, s4, suffixSubFase2},
 
     {t4, s4} = u[[t, -1]];
     suffixSubFase2  = ToString[t4]<>"_"<>ToString[s4];
@@ -128,7 +128,7 @@ T10SubFase2[t_] := Module[
 ];
 
 MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
-    {fase2, fase3, DiagramaMBenz},
+    {fase2, fase3},
 (*
     tInicial = AbsoluteTime[];
 *)
@@ -148,7 +148,7 @@ MBenzModelo[t_, k1_, k2_, k3_, D_] := Module[
 
 
 
-KERNELS = 3
+KERNELS = 2
 LaunchKernels[KERNELS]
 
 ParallelTable[<<FeynCalc`;,{i, 1, KERNELS}];
@@ -168,4 +168,4 @@ Parallelize[Map[T10Fase0, Range[buscados[[1]], buscados[[-1]], 36]]];
 (* Obtener todas las fase1*)
 Parallelize[Map[T10Fase1, Range[buscados[[1]], buscados[[-1]], 6]]];
 *)
-Parallelize[Map[F,{1,2,3}]];
+Parallelize[Map[F,Range[1,100]]];
