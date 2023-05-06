@@ -168,4 +168,4 @@ Parallelize[Map[T10Fase0, Range[buscados[[1]], buscados[[-1]], 36]]];
 (* Obtener todas las fase1*)
 Parallelize[Map[T10Fase1, Range[buscados[[1]], buscados[[-1]], 6]]];
 *)
-Parallelize[Map[F,Range[1,100]]];
+Parallelize[Map[F,Range[1,10]]];
